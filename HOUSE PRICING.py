@@ -193,3 +193,13 @@ plt.plot(val_errors , 'b-' , label = 'val error')
 plt.ylabel('MSE')
 plt.legend()
 plt.show()
+#----------------------early stopping point---------------------
+min_value = np.min(val_errors)
+min_arg = np.argmin(val_errors)
+
+plt.plot(train_errors , 'r-' , label = 'train error')
+plt.plot(val_errors , 'b-' , label = 'val error')
+plt.plot(min_arg , min_value , 'o' , color = 'black' ,label = 'early stopping point')
+plt.ylabel('MSE')
+plt.legend()
+plt.show()
