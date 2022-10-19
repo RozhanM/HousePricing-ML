@@ -166,3 +166,30 @@ ax[2].bar(pos , rmse)
 ax[2].set_title('RMSE')
 
 plt.show()
+#-----------------learning curve on best model--------------------------
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+def curve(model, x, y):
+    x_train , x_val , y_train, y_val = train_test_split(x , y , test_size=0.4)
+    train_error = []
+    val_error = []
+    for m in range (1 , len(x_train) , 10):
+        model.fit(x_train[:m] , y_train[:m])
+        y_trian_pred = model.predict(x_train[:m])
+        y_val_pred = model.predict(x_val)
+
+        train_error.append(mean_squared_error(y_train[:m] ,y_trian_pred))
+        val_error.append(mean_squared_error(y_val , y_val_pred))
+    return train_error , val_error
+
+model = Pipeline([
+                  ('linear_regressor', SGDRegressor())
+                ])
+
+train_errors , val_errors = curve(model , x_train , y_train)
+
+plt.plot(train_errors , 'r-' , label = 'train error')
+plt.plot(val_errors , 'b-' , label = 'val error')
+plt.ylabel('MSE')
+plt.legend()
+plt.show()
