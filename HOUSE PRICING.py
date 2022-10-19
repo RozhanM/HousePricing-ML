@@ -95,6 +95,7 @@ for column in categorical_columns.columns :
     df_test[column] = categorical_columns[column]
 
 df_train = df_train.drop(['Id'], axis= 1)
+df_train = df_train.dropna()
 x_train = df_train.drop(['SalePrice'], axis=1).values
 y_train = df_train['SalePrice'].values
 df_test = df_test.drop(['Id'], axis=1)
@@ -105,4 +106,39 @@ scaler.fit(x_train)
 x_train = scaler.transform(x_train)
 scaler.fit(x_test)
 x_test = scaler.transform(x_test)
-#---------------------------------------------------------------------------
+#-----------------------------linear regression----------------------------------------------
+from sklearn.model_selection import cross_validate
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error as MSE, r2_score as ACC
+
+results = []
+model_reg = LinearRegression()
+score = cross_validate(model_reg,x_train,y_train, cv=5, scoring=['neg_mean_squared_error','neg_root_mean_squared_error' , 'r2'] )
+results.append({'model': 'linear regression' , 'MSE':np.mean(score['test_neg_mean_squared_error']) , 'RMSE':np.mean(score['test_neg_root_mean_squared_error']) , 'ACC': np.mean(score['test_r2'])})
+
+#-----------------------sgd------------------------------------------
+from sklearn.linear_model import SGDRegressor
+model_sgd = SGDRegressor()
+score = cross_validate(model_sgd, x_train , y_train, cv=5 , scoring=['neg_mean_squared_error','neg_root_mean_squared_error' , 'r2'])
+results.append({'model': 'SGD' , 'MSE':np.mean(score['test_neg_mean_squared_error']) , 'RMSE':np.mean(score['test_neg_root_mean_squared_error']) , 'ACC': np.mean(score['test_r2'])})
+#------------------polynomial----------------------------------------
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.model_selection import GridSearchCV
+
+parameters = {'polynomial_features__degree':[1,2,3]}
+pipline = Pipeline([
+                  ('polynomial_features', PolynomialFeatures()),
+                  ('linear_regressor', SGDRegressor())
+                ])
+
+model = GridSearchCV(pipline, parameters)
+score = cross_validate(model , x_train, y_train , cv = 5 , scoring = ['neg_mean_squared_error' , 'neg_root_mean_squared_error' , 'r2'])
+results.append({'Model':'Poly Regression' , 'MSE':np.mean(score['test_neg_mean_squared_error']) , 'RMSE':np.mean(score['test_neg_root_mean_squared_error']) , 'ACC': np.mean(score['test_r2'])})
+#-----------------------------SVR--------------------------------------------------
+from sklearn.svm import SVR
+
+model = SVR()
+score = cross_validate(model , x_train , y_train , cv = 5 , scoring = ['neg_mean_squared_error' ,'neg_root_mean_squared_error' , 'r2'])
+results.append({'Model':'SVM Regression' , 'MSE':np.mean(score['test_neg_mean_squared_error']) , 'RMSE':np.mean(score['test_neg_root_mean_squared_error']) , 'ACC': np.mean(score['test_r2'])})
+print(results)
