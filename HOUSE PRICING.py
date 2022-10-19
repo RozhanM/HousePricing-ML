@@ -142,3 +142,27 @@ model = SVR()
 score = cross_validate(model , x_train , y_train , cv = 5 , scoring = ['neg_mean_squared_error' ,'neg_root_mean_squared_error' , 'r2'])
 results.append({'Model':'SVM Regression' , 'MSE':np.mean(score['test_neg_mean_squared_error']) , 'RMSE':np.mean(score['test_neg_root_mean_squared_error']) , 'ACC': np.mean(score['test_r2'])})
 print(results)
+#----------------comparing the models------------------------------------------
+for row in results:
+  if row['ACC'] < 0 :
+    row['ACC'] = 0
+
+fig , ax = plt.subplots(nrows = 3 , ncols =1)
+fig.set_figheight(15)
+fig.set_figwidth(8)
+
+pos = [row['model'] for row in results]
+
+acc = [row['ACC'] for row in results]
+ax[0].bar(pos , acc)
+ax[0].set_title('ACC')
+
+mse = [row['MSE'] for row in results]
+ax[1].bar(pos , mse)
+ax[1].set_title('MSE')
+
+rmse = [row['RMSE'] for row in results]
+ax[2].bar(pos , rmse)
+ax[2].set_title('RMSE')
+
+plt.show()
